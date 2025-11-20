@@ -1,4 +1,5 @@
 """Webhook management API endpoints."""
+from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -28,8 +29,8 @@ class WebhookResponse(BaseModel):
     url: str
     event_type: str
     enabled: bool
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
 
     class Config:
         from_attributes = True

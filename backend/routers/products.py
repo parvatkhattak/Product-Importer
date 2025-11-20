@@ -1,4 +1,5 @@
 """Product CRUD API endpoints."""
+from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -35,8 +36,8 @@ class ProductResponse(BaseModel):
     description: Optional[str]
     price: float
     active: bool
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
 
     class Config:
         from_attributes = True
