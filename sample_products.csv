@@ -1,0 +1,22 @@
+sku,name,description,price
+PROD-001,Wireless Bluetooth Headphones,"Premium noise-cancelling headphones with 30-hour battery life",99.99
+PROD-002,Smart Watch Series X,"Fitness tracking smartwatch with heart rate monitor and GPS",299.99
+PROD-003,USB-C Fast Charger,"65W fast charging adapter compatible with laptops and phones",34.99
+PROD-004,Portable SSD 1TB,"High-speed external solid state drive with USB 3.2",129.99
+PROD-005,Mechanical Keyboard RGB,"Gaming keyboard with customizable RGB lighting and Cherry MX switches",149.99
+PROD-006,Wireless Mouse,"Ergonomic wireless mouse with adjustable DPI up to 16000",49.99
+PROD-007,4K Webcam,"Ultra HD webcam with autofocus and dual microphones",89.99
+PROD-008,Laptop Stand Aluminum,"Adjustable laptop stand with cable management",39.99
+PROD-009,Phone Case Clear,"Slim transparent protective case with shock absorption",19.99
+PROD-010,Screen Protector Glass,"Tempered glass screen protector with oleophobic coating",14.99
+prod-001,Wireless Bluetooth Headphones Updated,"This is a duplicate SKU (different case) - should overwrite PROD-001",109.99
+PROD-011,USB Hub 7-Port,"Powered USB hub with individual switches",29.99
+PROD-012,Ethernet Cable 10ft,"Cat8 ethernet cable for high-speed networking",15.99
+PROD-013,Monitor Arm Dual,"Adjustable dual monitor mount with VESA compatibility",119.99
+PROD-014,Desk Lamp LED,"Dimmable LED desk lamp with wireless charging base",44.99
+PROD-015,Cable Organizer Set,"Cable management clips and sleeves for desk organization",12.99
+PROD-016,Laptop Sleeve 15inch,"Padded laptop sleeve with accessory pocket",24.99
+PROD-017,Bluetooth Speaker,"Portable waterproof speaker with 360-degree sound",59.99
+PROD-018,Ring Light 10inch,"LED ring light with tripod stand for video calls",34.99
+PROD-019,Gaming Mousepad XXL,"Extended gaming mousepad with RGB lighting",39.99
+PROD-020,Microphone USB,"Condenser USB microphone for podcasting and streaming",79.99

@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: product-importer-web
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements.txt && alembic upgrade head"
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ENVIRONMENT
+        value: production
+      - fromGroup: product-importer-secrets
+
+  - type: worker
+    name: product-importer-worker
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "celery -A backend.celery_app worker --loglevel=info"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - fromGroup: product-importer-secrets
+
+databases:
+  - name: product-importer-db
+    plan: free
+    region: oregon
+    databaseName: product_importer
+    user: product_importer
+
+  - name: product-importer-redis
+    plan: free
+    region: oregon
+    ipAllowList: []
