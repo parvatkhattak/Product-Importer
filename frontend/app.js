@@ -44,23 +44,23 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===== FILE UPLOAD =====
 function initializeUpload() {
     uploadArea.addEventListener('click', () => fileInput.click());
-    
+
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.style.borderColor = 'var(--primary-solid)';
     });
-    
+
     uploadArea.addEventListener('dragleave', () => {
         uploadArea.style.borderColor = '';
     });
-    
+
     uploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadArea.style.borderColor = '';
         const file = e.dataTransfer.files[0];
         if (file) handleFileUpload(file);
     });
-    
+
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) handleFileUpload(file);
@@ -72,78 +72,49 @@ async function handleFileUpload(file) {
         showNotification('Please select a CSV file', 'error');
         return;
     }
-    
+
     const formData = new FormData();
     formData.append('file', file);
-    
+
     try {
         uploadArea.style.display = 'none';
         progressContainer.style.display = 'block';
-        
+
+        // Show simple uploading state
+        progressFill.style.width = '50%';
+        progressPercent.textContent = '';
+        progressText.textContent = 'Uploading...';
+        progressDetails.textContent = 'Please wait while we process your file';
+
         const response = await fetch(`${API_BASE}/api/upload`, {
             method: 'POST',
             body: formData
         });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            streamProgress(data.task_id);
-        } else {
-            throw new Error(data.detail || 'Upload failed');
-        }
-    } catch (error) {
-        showNotification(error.message, 'error');
-        resetUploadUI();
-    }
-}
 
-function streamProgress(taskId) {
-    if (uploadEventSource) {
-        uploadEventSource.close();
-    }
-    
-    uploadEventSource = new EventSource(`${API_BASE}/api/upload/${taskId}/progress`);
-    
-    uploadEventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        if (data.error) {
-            showNotification(data.error, 'error');
-            uploadEventSource.close();
-            resetUploadUI();
-            return;
-        }
-        
-        // Update progress
-        progressFill.style.width = `${data.progress}%`;
-        progressPercent.textContent = `${data.progress}%`;
-        progressText.textContent = data.status === 'completed' ? 'Upload Complete!' : 'Processing...';
-        
-        if (data.total_rows > 0) {
-            progressDetails.textContent = `${data.processed_rows || 0} / ${data.total_rows} rows processed`;
-        }
-        
-        // Handle completion
-        if (data.status === 'completed') {
-            uploadEventSource.close();
+        const data = await response.json();
+
+        if (response.ok) {
+            // Show completion
+            progressFill.style.width = '100%';
+            progressText.textContent = '✓ Upload Complete!';
+            progressDetails.textContent = 'Your file has been imported successfully';
+
             showNotification('CSV imported successfully!', 'success');
+
+            // Reset and reload after delay
             setTimeout(() => {
                 resetUploadUI();
                 loadProducts();
             }, 2000);
-        } else if (data.status === 'failed') {
-            uploadEventSource.close();
-            showNotification(data.error_message || 'Upload failed', 'error');
-            setTimeout(resetUploadUI, 2000);
+        } else {
+            throw new Error(data.detail || 'Upload failed');
         }
-    };
-    
-    uploadEventSource.onerror = () => {
-        uploadEventSource.close();
-        showNotification('Connection lost. Please refresh to check status.', 'error');
-        setTimeout(resetUploadUI, 2000);
-    };
+    } catch (error) {
+        progressText.textContent = '✗ Upload Failed';
+        progressDetails.textContent = error.message;
+        showNotification(error.message, 'error');
+        setTimeout(resetUploadUI, 3000);
+    }
 }
 
 function resetUploadUI() {
@@ -162,29 +133,29 @@ function initializeProducts() {
     document.getElementById('closeProductModal').addEventListener('click', closeProductModal);
     document.getElementById('cancelProductBtn').addEventListener('click', closeProductModal);
     document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
-    
+
     searchInput.addEventListener('input', debounce(() => {
         currentPage = 0;
         loadProducts();
     }, 500));
-    
+
     activeFilter.addEventListener('change', () => {
         currentPage = 0;
         loadProducts();
     });
-    
+
     prevPageBtn.addEventListener('click', () => {
         if (currentPage > 0) {
             currentPage--;
             loadProducts();
         }
     });
-    
+
     nextPageBtn.addEventListener('click', () => {
         currentPage++;
         loadProducts();
     });
-    
+
     productModal.addEventListener('click', (e) => {
         if (e.target === productModal) closeProductModal();
     });
@@ -194,19 +165,19 @@ async function loadProducts() {
     const search = searchInput.value;
     const active = activeFilter.value;
     const skip = currentPage * pageSize;
-    
+
     const params = new URLSearchParams({
         skip: skip,
         limit: pageSize,
     });
-    
+
     if (search) params.append('search', search);
     if (active) params.append('active', active);
-    
+
     try {
         const response = await fetch(`${API_BASE}/api/products?${params}`);
         const data = await response.json();
-        
+
         renderProducts(data.products);
         updatePagination(data.total, skip);
     } catch (error) {
@@ -219,7 +190,7 @@ function renderProducts(products) {
         productsTableBody.innerHTML = '<tr><td colspan="6" class="loading">No products found</td></tr>';
         return;
     }
-    
+
     productsTableBody.innerHTML = products.map(product => `
         <tr>
             <td><strong>${escapeHtml(product.sku)}</strong></td>
@@ -242,7 +213,7 @@ function renderProducts(products) {
 function updatePagination(total, skip) {
     const currentPageNum = Math.floor(skip / pageSize) + 1;
     const totalPages = Math.ceil(total / pageSize);
-    
+
     pageInfo.textContent = `Page ${currentPageNum} of ${totalPages || 1}`;
     prevPageBtn.disabled = currentPage === 0;
     nextPageBtn.disabled = skip + pageSize >= total;
@@ -260,7 +231,7 @@ async function editProduct(id) {
     try {
         const response = await fetch(`${API_BASE}/api/products/${id}`);
         const product = await response.json();
-        
+
         currentEditProductId = id;
         document.getElementById('modalTitle').textContent = 'Edit Product';
         document.getElementById('productSku').value = product.sku;
@@ -268,7 +239,7 @@ async function editProduct(id) {
         document.getElementById('productDescription').value = product.description || '';
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productActive').checked = product.active;
-        
+
         productModal.classList.add('active');
     } catch (error) {
         showNotification('Failed to load product', 'error');
@@ -277,7 +248,7 @@ async function editProduct(id) {
 
 async function handleProductSubmit(e) {
     e.preventDefault();
-    
+
     const data = {
         sku: document.getElementById('productSku').value,
         name: document.getElementById('productName').value,
@@ -285,20 +256,20 @@ async function handleProductSubmit(e) {
         price: parseFloat(document.getElementById('productPrice').value),
         active: document.getElementById('productActive').checked
     };
-    
+
     try {
-        const url = currentEditProductId 
+        const url = currentEditProductId
             ? `${API_BASE}/api/products/${currentEditProductId}`
             : `${API_BASE}/api/products`;
-        
+
         const method = currentEditProductId ? 'PUT' : 'POST';
-        
+
         const response = await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        
+
         if (response.ok) {
             showNotification(
                 currentEditProductId ? 'Product updated!' : 'Product created!',
@@ -323,7 +294,7 @@ async function deleteProduct(id) {
                 const response = await fetch(`${API_BASE}/api/products/${id}`, {
                     method: 'DELETE'
                 });
-                
+
                 if (response.ok) {
                     showNotification('Product deleted!', 'success');
                     loadProducts();
@@ -345,7 +316,7 @@ async function handleBulkDelete() {
                 const response = await fetch(`${API_BASE}/api/products`, {
                     method: 'DELETE'
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     showNotification(`Deleted ${data.deleted} products`, 'success');
@@ -372,7 +343,7 @@ function initializeWebhooks() {
     document.getElementById('closeWebhookModal').addEventListener('click', closeWebhookModal);
     document.getElementById('cancelWebhookBtn').addEventListener('click', closeWebhookModal);
     document.getElementById('webhookForm').addEventListener('submit', handleWebhookSubmit);
-    
+
     webhookModal.addEventListener('click', (e) => {
         if (e.target === webhookModal) closeWebhookModal();
     });
@@ -393,7 +364,7 @@ function renderWebhooks(webhooks) {
         webhooksList.innerHTML = '<p class="loading">No webhooks configured</p>';
         return;
     }
-    
+
     webhooksList.innerHTML = webhooks.map(webhook => `
         <div class="webhook-item">
             <div class="webhook-header">
@@ -425,12 +396,12 @@ async function editWebhook(id) {
     try {
         const response = await fetch(`${API_BASE}/api/webhooks/${id}`);
         const webhook = await response.json();
-        
+
         currentEditWebhookId = id;
         document.getElementById('webhookUrl').value = webhook.url;
         document.getElementById('webhookEvent').value = webhook.event_type;
         document.getElementById('webhookEnabled').checked = webhook.enabled;
-        
+
         webhookModal.classList.add('active');
     } catch (error) {
         showNotification('Failed to load webhook', 'error');
@@ -439,26 +410,26 @@ async function editWebhook(id) {
 
 async function handleWebhookSubmit(e) {
     e.preventDefault();
-    
+
     const data = {
         url: document.getElementById('webhookUrl').value,
         event_type: document.getElementById('webhookEvent').value,
         enabled: document.getElementById('webhookEnabled').checked
     };
-    
+
     try {
-        const url = currentEditWebhookId 
+        const url = currentEditWebhookId
             ? `${API_BASE}/api/webhooks/${currentEditWebhookId}`
             : `${API_BASE}/api/webhooks`;
-        
+
         const method = currentEditWebhookId ? 'PUT' : 'POST';
-        
+
         const response = await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        
+
         if (response.ok) {
             showNotification(
                 currentEditWebhookId ? 'Webhook updated!' : 'Webhook created!',
@@ -477,13 +448,13 @@ async function handleWebhookSubmit(e) {
 async function testWebhook(id) {
     try {
         showNotification('Testing webhook...', 'info');
-        
+
         const response = await fetch(`${API_BASE}/api/webhooks/${id}/test`, {
             method: 'POST'
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showNotification(
                 `Webhook test successful! (${result.status_code}, ${result.response_time.toFixed(2)}s)`,
@@ -505,7 +476,7 @@ async function deleteWebhook(id) {
                 const response = await fetch(`${API_BASE}/api/webhooks/${id}`, {
                     method: 'DELETE'
                 });
-                
+
                 if (response.ok) {
                     showNotification('Webhook deleted!', 'success');
                     loadWebhooks();
@@ -551,7 +522,7 @@ function closeConfirmModal() {
 function showNotification(message, type = 'info') {
     // Simple console notification for now
     console.log(`[${type.toUpperCase()}] ${message}`);
-    
+
     // Could implement toast notifications here
     if (type === 'error') {
         alert(`Error: ${message}`);

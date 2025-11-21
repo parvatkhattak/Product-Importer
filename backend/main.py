@@ -26,11 +26,11 @@ app.include_router(products.router)
 app.include_router(upload.router)
 app.include_router(webhooks.router)
 
-# Serve frontend static files
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
-
-
 @app.get("/health")
 def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+
+# Serve frontend static files
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")

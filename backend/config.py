@@ -10,11 +10,11 @@ class Settings(BaseSettings):
     # Database
     database_url: str = os.getenv(
         "DATABASE_URL", 
-        "postgresql://user:password@localhost:5432/product_importer"
+        "postgresql://user:password@localhost:5433/product_importer"
     )
     
     # Redis
-    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6380/0")
     
     # Application
     environment: str = os.getenv("ENVIRONMENT", "development")

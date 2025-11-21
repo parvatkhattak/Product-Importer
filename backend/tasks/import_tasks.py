@@ -148,6 +148,15 @@ def _process_chunk(db, chunk: List[Dict]):
     
     if not products_data:
         return
+
+    # Deduplicate within the chunk (keep last occurrence)
+    # This prevents "ON CONFLICT DO UPDATE command cannot affect row a second time"
+    unique_products = {}
+    for p in products_data:
+        sku_key = p["sku"].lower()
+        unique_products[sku_key] = p
+    
+    products_data = list(unique_products.values())
     
     # Bulk upsert using PostgreSQL's ON CONFLICT
     # This handles duplicate SKUs (case-insensitive)

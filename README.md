@@ -11,11 +11,12 @@ A scalable web application for importing products from CSV files into PostgreSQL
 
 ### 📤 CSV Import (STORY 1 & 1A)
 - Upload CSV files with up to 500,000 products
-- Real-time progress tracking via Server-Sent Events (SSE)
-- Visual progress bar with percentage and row count
+- Simple, clean upload interface with status feedback
+- Visual progress bar showing upload state
 - Chunked processing (10,000 rows per chunk) for memory efficiency
 - Automatic duplicate handling (case-insensitive SKU matching)
-- Asynchronous processing to avoid request timeouts
+- Asynchronous background processing to avoid request timeouts
+- Automatic product list refresh after successful import
 
 ### 📋 Product Management (STORY 2)
 - View products with pagination (50 per page)

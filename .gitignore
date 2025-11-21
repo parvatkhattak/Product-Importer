@@ -65,3 +65,15 @@ htmlcov/
 # Deployment
 *.pid
 *.sock
+
+# Debug files
+debug_*.py
+test.db
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+
+# Gemini artifacts (development only)
+.gemini/
