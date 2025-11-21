@@ -1,12 +1,21 @@
 """Celery application configuration."""
+import os
 from celery import Celery
 from backend.config import settings
+
+# Validate Redis URL
+redis_url = settings.redis_url
+print(f"[CELERY] Using Redis URL: {redis_url[:20]}...")  # Print first 20 chars for security
+
+# Ensure Redis URL is valid
+if not redis_url or not (redis_url.startswith('redis://') or redis_url.startswith('rediss://')):
+    raise ValueError(f"Invalid REDIS_URL: {redis_url[:50]}... - must start with redis:// or rediss://")
 
 # Create Celery application
 celery_app = Celery(
     "product_importer",
-    broker=settings.redis_url,
-    backend=settings.redis_url,
+    broker=redis_url,
+    backend=redis_url,
     include=[
         "backend.tasks.import_tasks",
         "backend.tasks.webhook_tasks"
