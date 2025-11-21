@@ -11,7 +11,18 @@ services:
         value: 3.11.0
       - key: ENVIRONMENT
         value: production
-      - fromGroup: product-importer-secrets
+      - key: DATABASE_URL
+        fromDatabase:
+          name: product-importer-db
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: product-importer-redis
+          property: connectionString
+      - key: CORS_ORIGINS
+        sync: false
+      - key: MAX_UPLOAD_SIZE_MB
+        value: 100
 
   - type: worker
     name: product-importer-worker
@@ -23,7 +34,16 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - fromGroup: product-importer-secrets
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: product-importer-db
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: product-importer-redis
+          property: connectionString
 
 databases:
   - name: product-importer-db
